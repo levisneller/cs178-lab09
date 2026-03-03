@@ -3,7 +3,7 @@
 # Part of Lab 09 — feature/read-dynamo branch
 
 import boto3
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Attr
 
 # -------------------------------------------------------
 # Configuration — update REGION if your table is elsewhere
@@ -31,7 +31,6 @@ def print_movie(movie):
     print()
 
 
-
 def print_all_movies():
     """Scan the entire Movies table and print each item."""
     table = get_table()
@@ -51,9 +50,31 @@ def print_all_movies():
         print_movie(movie)
 
 
+def get_movie_by_title():
+    """Prompt user for a movie title and search for it."""
+    table = get_table()
+
+    user_title = input("Enter a movie title to search for: ")
+
+    response = table.scan(
+        FilterExpression=Attr("Title").eq(user_title)
+    )
+
+    items = response.get("Items", [])
+
+    if items:
+        print("\nMovie found:\n")
+        print_movie(items[0])
+    else:
+        print(f"\nMovie titled '{user_title}' not found.")
+
+
 def main():
     print("===== Reading from DynamoDB =====\n")
     print_all_movies()
+
+    print("\n===== Search for a Movie =====\n")
+    get_movie_by_title()
 
 
 if __name__ == "__main__":
